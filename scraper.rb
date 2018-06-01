@@ -23,8 +23,8 @@
 # All that matters is that your final data is written to an SQLite database
 # called "data.sqlite" in the current working directory which has at least a table
 # called "data".
-require 'watir'
-require 'headless'
+require "capybara"
+require "selenium-webdriver"
 require 'httparty'
 require 'nokogiri'
 require 'mechanize'
@@ -41,6 +41,13 @@ hprice = fam_div.css('span.price-regimen')[3].text.delete('€').delete(',').str
 hdate = DateTime.now.strftime("%d-%m-%Y %H-%M")
 ScraperWiki.save_sqlite(["name", "date"], { "date" => hdate,"name" => hname, "price" => hprice})
 
+capybara = Capybara::Session.new(:selenium_chrome_headless)
+# Start scraping
+capybara.visit("https://www.booking.com/hotel/es/santa-barbara-golf-and-ocean-club.ru.html?label=gen173nr-1FCAEoggJCAlhYSDNYBGjCAYgBAZgBIbgBB8gBDNgBAegBAfgBC5ICAXmoAgM;sid=6411abf698a6e8add1caa961b1846f07;age=0;age=5;all_sr_blocks=18875801_89758350_0_0_0;checkin=2018-08-25;checkout=2018-09-01;dest_id=-401188;dest_type=city;group_adults=2;group_children=2;hapos=1;highlighted_blocks=18875801_89758350_0_0_0;hpos=1;no_rooms=1;room1=A%2CA%2C0%2C5;sb_price_type=total;srepoch=1527772281;srfid=0c6ad07b6f24d4446e290d410a42800df8d75c7bX1;srpvid=e6425cbc25650165;type=total;ucfs=1&;selected_currency=EUR;changed_currency=1;top_currency=1")
+hprice = capybara.first(:css, '.hprt-price-price-standard').text.delete('€').strip.to_i
+hname = 'Santa barbara golf and ocean club'
+
+ScraperWiki.save_sqlite(["name", "date"], { "date" => hdate,"name" => hname, "price" => hprice})
 
 agent = Mechanize.new
 page  = agent.get("https://www.pluscar-tenerife.com/booking.php")
