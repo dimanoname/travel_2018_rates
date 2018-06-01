@@ -38,8 +38,7 @@ nokogiri_page = Nokogiri::HTML(page)
 fam_div = nokogiri_page.css("div[data-category=FAM]")
 hname = 'Sol Arona Tenerife'
 hprice = fam_div.css('span.price-regimen')[3].text.delete('€').delete(',').strip.to_i
-puts hname
-puts hprice
-ScraperWiki.save_sqlite(["name"], { "name" => hname, "price" => hprice})
-ScraperWiki.select("* from data")
+hdate = DateTime.now.strftime("%d-%m-%Y %H-%M")
+
+ScraperWiki.save_sqlite(["name"], { "date" => hdate,"name" => hname, "price" => hprice})
 
