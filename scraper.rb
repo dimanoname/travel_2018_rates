@@ -39,6 +39,28 @@ fam_div = nokogiri_page.css("div[data-category=FAM]")
 hname = 'Sol Arona Tenerife'
 hprice = fam_div.css('span.price-regimen')[3].text.delete('€').delete(',').strip.to_i
 hdate = DateTime.now.strftime("%d-%m-%Y %H-%M")
+ScraperWiki.save_sqlite(["name", "date"], { "date" => hdate,"name" => hname, "price" => hprice})
 
-ScraperWiki.save_sqlite(["name"], { "date" => hdate,"name" => hname, "price" => hprice})
+
+agent = Mechanize.new
+page  = agent.get("https://www.pluscar-tenerife.com/booking.php")
+frm = page.form('frm')
+frm.start_date = "2018/08/18"
+frm.end_date = "2018/09/01"
+frm.start_hour_hour = 18
+frm.end_hour_hour = 18
+page = agent.submit(frm)
+
+
+cars = page.search("div.cars.panel").map do |car|  
+	car_name = car.css("div.cars_name").text
+	car_price = car.css("div.cars_price").text.delete('€').strip.to_i
+	{car: car_name, 
+	price: car_price}
+end
+
+
+cars.each {|car| if car[:car] == "Toyota Auris" then ScraperWiki.save_sqlite(["name", "date"], { "date" => hdate,"name" => car[:car], "price" => car[:price]})  end}
+
+
 
